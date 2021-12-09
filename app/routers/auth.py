@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from starlette.status import HTTP_401_UNAUTHORIZED
 
 from app import models
-from .. import database, schemas,utils
+from .. import database, schemas,utils,oauth2
 
 router = APIRouter(
     tags  = ['Authentication']
@@ -19,4 +19,6 @@ def login(user_cred: schemas.UserLogin,db: Session = Depends(database.get_db)):
     if not utils.verify(user_cred.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid Credentials")
     
-    return {"token ":"successfull"}
+    access_token = oauth2.Create_access_token(data={'user_id' : user.id})
+
+    return {"access_token":access_token, "token_type": "bearer"}
